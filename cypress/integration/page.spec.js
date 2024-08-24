@@ -1,6 +1,4 @@
 /* eslint-disable max-len */
-import movies from '../../src/api/movies.json';
-
 const page = {
   getMovies: () => cy.byDataCy('movie-card'),
 
@@ -42,6 +40,15 @@ const page = {
   },
 };
 
+const newMovie = {
+  title: 'The Umbrella Academy',
+  description:
+    'A family of former child heroes, now grown apart, must reunite to continue to protect the world.',
+  imgUrl:
+    'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
+  imdbId: 'tt1312171',
+};
+
 describe('NewMovie', () => {
   beforeEach(() => {
     cy.visit('/');
@@ -63,37 +70,24 @@ describe('NewMovie', () => {
   });
 
   it('should allow to enter a description', () => {
-    const description =
-      'A family of former child heroes, now grown apart, must reunite to continue to protect the world.';
+    page.getByDataCy('movie-description').type('Some description');
 
     page
       .getByDataCy('movie-description')
-      .type(description)
-      .should('have.value', description);
+      .should('have.value', 'Some description');
   });
 
   it('should allow to enter an imgUrl', () => {
-    const imgUrl =
-      'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg';
-
-    cy.byDataCy('movie-imgUrl').type(imgUrl);
-    cy.byDataCy('movie-imgUrl').should('have.value', imgUrl);
-  });
-
-  it('should allow to enter an imdbUrl', () => {
-    const imdbUrl = 'https://www.imdb.com/title/tt1312171';
-
-    page
-      .getByDataCy('movie-imdbUrl')
-      .type(imdbUrl)
-      .should('have.value', imdbUrl);
+    cy.byDataCy('movie-imgUrl').type('https://www.example.com/image.jpg');
+    cy.byDataCy('movie-imgUrl').should(
+      'have.value',
+      'https://www.example.com/image.jpg',
+    );
   });
 
   it('should allow to enter an imdbId', () => {
-    const imdbId = 'tt1312171';
-
-    cy.byDataCy('movie-imdbId').type(imdbId);
-    cy.byDataCy('movie-imdbId').should('have.value', imdbId);
+    cy.byDataCy('movie-imdbId').type('tt1312171');
+    cy.byDataCy('movie-imdbId').should('have.value', 'tt1312171');
   });
 
   it('should disable submit button by default', () => {
@@ -101,16 +95,7 @@ describe('NewMovie', () => {
   });
 
   it('should enable submit button after entering all the required fields', () => {
-    const movie = {
-      title: 'The Umbrella Academy',
-      description: '',
-      imgUrl:
-        'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
-      imdbUrl: 'https://www.imdb.com/title/tt1312171',
-      imdbId: 'tt1312171',
-    };
-
-    page.fillForm(movie);
+    page.fillForm({ ...newMovie });
 
     cy.byDataCy('submit-button').should('not.be.disabled');
   });
@@ -168,45 +153,22 @@ describe('NewMovie', () => {
   });
 
   it('should clear the form after a successful submission', () => {
-    const movie = {
-      title: 'The Umbrella Academy',
-      description:
-        'A family of former child heroes, now grown apart, must reunite to continue to protect the world.',
-      imgUrl:
-        'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
-      imdbUrl: 'https://www.imdb.com/title/tt1312171',
-      imdbId: 'tt1312171',
-    };
-
-    page.fillForm(movie);
+    page.fillForm({ ...newMovie });
     page.submitForm();
 
     page.assertFormIsEmpty();
   });
 
   it('should not clear the form if title is empty', () => {
-    const movie = {
-      title: '',
-      description:
-        'A family of former child heroes, now grown apart, must reunite to continue to protect the world.',
-      imgUrl:
-        'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
-      imdbUrl: 'https://www.imdb.com/title/tt1312171',
-      imdbId: 'tt1312171',
-    };
-
-    page.fillForm(movie);
+    page.fillForm({ ...newMovie, title: '' });
     page.submitForm();
 
     page
       .getByDataCy('movie-description')
-      .should('have.value', movie.description);
+      .should('have.value', newMovie.description);
 
-    cy.byDataCy('movie-imgUrl').should('have.value', movie.imgUrl);
-
-    cy.byDataCy('movie-imdbUrl').should('have.value', movie.imdbUrl);
-
-    cy.byDataCy('movie-imdbId').should('have.value', movie.imdbId);
+    cy.byDataCy('movie-imgUrl').should('have.value', newMovie.imgUrl);
+    cy.byDataCy('movie-imdbId').should('have.value', newMovie.imdbId);
   });
 
   it('should not have errors after a successful submission', () => {
@@ -220,44 +182,27 @@ describe('Page', () => {
   });
 
   it('should add a movie with correct data', () => {
-    const movie = {
-      title: 'The Umbrella Academy',
-      description:
-        'A family of former child heroes, now grown apart, must reunite to continue to protect the world.',
-      imgUrl:
-        'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
-      imdbUrl: 'https://www.imdb.com/title/tt1312171',
-      imdbId: 'tt1312171',
-    };
-
-    page.fillForm(movie);
+    page.fillForm({ ...newMovie });
     page.submitForm();
 
-    page.getMovies().should('have.length', movies.length + 1);
-
-    page.getMovies().last().find('.title').should('have.text', movie.title);
+    page.getMovies().should('have.length', 1);
+    page.getMovies().last().find('.title').should('have.text', newMovie.title);
 
     page
       .getMovies()
       .last()
       .find('.content')
-      .should('contain', movie.description);
+      .should('contain', newMovie.description);
 
-    page.getMovies().last().find(`a[href="${movie.imdbUrl}"]`).should('exist');
+    page
+      .getMovies()
+      .last()
+      .find(`a[href="https://www.imdb.com/title/${newMovie.imdbId}"]`)
+      .should('exist');
   });
 
   it('should not be reloaded', () => {
-    const movie = {
-      title: 'The Umbrella Academy',
-      description:
-        'A family of former child heroes, now grown apart, must reunite to continue to protect the world.',
-      imgUrl:
-        'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
-      imdbUrl: 'https://www.imdb.com/title/tt1312171',
-      imdbId: 'tt1312171',
-    };
-
-    page.fillForm(movie);
+    page.fillForm({ ...newMovie });
 
     cy.window().should('not.have.prop', 'beforeReload');
 
@@ -270,17 +215,7 @@ describe('Page', () => {
   });
 
   it('should clean the form after adding a movie', () => {
-    const movie = {
-      title: 'The Umbrella Academy',
-      description:
-        'A family of former child heroes, now grown apart, must reunite to continue to protect the world.',
-      imgUrl:
-        'https://m.media-amazon.com/images/M/MV5BOTdlODM0MTAtMzRiZi00MTQxLWE0MGUtNTNjOGZjNjAzN2E0XkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_QL75_UY562_CR35,0,380,562_.jpg',
-      imdbUrl: 'https://www.imdb.com/title/tt1312171',
-      imdbId: 'tt1312171',
-    };
-
-    page.fillForm(movie);
+    page.fillForm({ ...newMovie });
     page.submitForm();
 
     cy.byDataCy('movie-title').should('be.empty');
