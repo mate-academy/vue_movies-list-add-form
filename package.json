@@ -1,0 +1,73 @@
+{
+  "name": "vue_movies-list",
+  "base": "/vue_movies-list/",
+  "homepage": "vue_movies-list",
+  "version": "0.1.0",
+  "keywords": [],
+  "author": "Mate Academy",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.5.2",
+    "bulma": "^1.0.1",
+    "vue": "^3.4.29"
+  },
+  "devDependencies": {
+    "@mate-academy/scripts": "^1.9.4",
+    "@mate-academy/stylelint-config": "*",
+    "@rushstack/eslint-patch": "^1.8.0",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "cypress": "^13.13.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-cypress": "^3.3.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-vue": "^9.23.0",
+    "gh-pages": "^6.1.1",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0",
+    "prettier": "^3.3.2",
+    "sass": "^1.77.8",
+    "stylelint": "^16.7.0",
+    "vite": "^5.3.1",
+    "vite-plugin-vue-devtools": "^7.3.1"
+  },
+  "scripts": {
+    "start": "mate-scripts start -l",
+    "build": "mate-scripts build",
+    "test": "mate-scripts test -l",
+    "style-format": "stylelint 'src/**/*.scss' --fix --allow-empty-input",
+    "lint-js": "mate-scripts lint -j",
+    "lint-css": "mate-scripts lint -s",
+    "format": "prettier --write './src/**/*.{js,vue}'",
+    "lint": "npm run style-format && npm run format && npm run lint-css && npm run lint-js",
+    "update": "mate-scripts update",
+    "postinstall": "npm run update && cypress verify",
+    "predeploy": "npm run build",
+    "deploy": "mate-scripts deploy"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "mateAcademy": {
+    "projectType": "vue",
+    "nodejsMajorVersion": "20",
+    "tests": {
+      "_comment": "Add `cypressComponents: true` to enable component tests",
+      "cypressComponents": false,
+      "cypress": true
+    }
+  }
+}
