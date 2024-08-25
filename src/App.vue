@@ -1,5 +1,40 @@
 <script setup>
-// import movies from './data/movies.json';
+import { ref } from 'vue';
+
+const movies = ref([]);
+
+const getEmptyValues = () => ({
+  title: '',
+  description: '',
+  imgUrl: '',
+  imdbId: '',
+});
+
+const getEmptyErrors = () => ({
+  title: false,
+  imgUrl: false,
+  imdbId: false,
+});
+
+const values = ref(getEmptyValues());
+const errors = ref(getEmptyErrors());
+
+function handleSubmit() {
+  errors.value = {
+    title: !values.value.title,
+    imgUrl: !values.value.imgUrl,
+    imdbId: !values.value.imdbId,
+  };
+
+  if (Object.values(errors.value).some(Boolean)) {
+    return;
+  }
+
+  const imdbUrl = `https://www.imdb.com/title/${values.value.imdbId}`;
+
+  movies.value.push({ ...values.value, imdbUrl });
+  values.value = getEmptyValues();
+}
 </script>
 
 <template>
@@ -7,15 +42,22 @@
   <div class="page">
     <div class="page-content">
       <div class="movies">
-        <div class="card" data-cy="movie">
+        <div
+          v-for="movie of movies"
+          :key="movie.imdbId"
+          class="card"
+          data-cy="movie"
+        >
           <div class="card-image">
             <figure class="image is-4by3">
               <img
-                src="https://m.media-amazon.com/images/M/MV5BMjEwMzMxODIzOV5BMl5BanBnXkFtZTgwNzg3OTAzMDI@._V1_SY1000_SX675_AL_.jpg"
-                alt="Film logo"
+                data-cy="movie__image"
+                :src="movie.imgUrl"
+                :alt="movie.title"
               />
             </figure>
           </div>
+
           <div class="card-content">
             <div class="media">
               <div class="media-left">
@@ -24,14 +66,16 @@
                 </figure>
               </div>
               <div class="media-content">
-                <p class="title is-8">Rogue One</p>
+                <p data-cy="movie__title" class="title is-8">
+                  {{ movie.title }}
+                </p>
               </div>
             </div>
-            <div class="content">
-              The daughter of an Imperial scientist joins the Rebel Alliance in
-              a risky move to steal the Death Star plans.
+
+            <div data-cy="movie__description" class="content">
+              {{ movie.description }}
               <br />
-              <a href="https://www.imdb.com/title/tt3748528">IMDB</a>
+              <a data-cy="movie__link" :href="movie.imdbUrl"> IMDB </a>
             </div>
           </div>
         </div>
@@ -39,19 +83,23 @@
     </div>
 
     <div class="sidebar">
-      <form>
+      <form @submit.prevent="handleSubmit">
         <h2 class="title">Add a movie</h2>
+
         <div class="field">
           <label class="label" for="title-20492567846734056">Title</label>
           <div class="control">
             <input
               id="title-20492567846734056"
               data-cy="movie-form__title"
-              class="input is-danger"
+              class="input"
+              :class="{ 'is-danger': errors.title }"
               placeholder="Enter Title"
+              v-model.trim="values.title"
+              @blur="errors.title = !values.title"
             />
           </div>
-          <p class="help is-danger">Title is required</p>
+          <p class="help is-danger" v-if="errors.title">Title is required</p>
         </div>
 
         <div class="field">
@@ -64,6 +112,7 @@
               data-cy="movie-form__description"
               class="textarea"
               placeholder="Enter Description"
+              v-model.trim="values.description"
             ></textarea>
           </div>
         </div>
@@ -74,11 +123,16 @@
             <input
               id="imgUrl-03780931512410235"
               data-cy="movie-form__imgUrl"
-              class="input is-danger"
+              class="input"
+              :class="{ 'is-danger': errors.imgUrl }"
               placeholder="Enter image URL"
+              v-model.trim="values.imgUrl"
+              @blur="errors.imgUrl = !values.imgUrl"
             />
           </div>
-          <p class="help is-danger">Image URL is required</p>
+          <p class="help is-danger" v-if="errors.imgUrl">
+            Image URL is required
+          </p>
         </div>
 
         <div class="field">
@@ -87,11 +141,14 @@
             <input
               id="imdbId-7255654555627964"
               data-cy="movie-form__imdbId"
-              class="input is-danger"
+              class="input"
+              :class="{ 'is-danger': errors.imdbId }"
               placeholder="Enter Imdb ID"
+              v-model.trim="values.imdbId"
+              @blur="errors.imdbId = !values.imdbId"
             />
           </div>
-          <p class="help is-danger">Imdb ID is required</p>
+          <p class="help is-danger" v-if="errors.imdbId">Imdb ID is required</p>
         </div>
 
         <div class="field is-grouped">
