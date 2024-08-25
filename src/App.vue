@@ -7,7 +7,7 @@
   <div class="page">
     <div class="page-content">
       <div class="movies">
-        <div class="card" data-cy="movie-card">
+        <div class="card" data-cy="movie">
           <div class="card-image">
             <figure class="image is-4by3">
               <img
@@ -39,14 +39,14 @@
     </div>
 
     <div class="sidebar">
-      <form class="NewMovie">
+      <form>
         <h2 class="title">Add a movie</h2>
         <div class="field">
           <label class="label" for="title-20492567846734056">Title</label>
           <div class="control">
             <input
               id="title-20492567846734056"
-              data-cy="movie-title"
+              data-cy="movie-form__title"
               class="input is-danger"
               placeholder="Enter Title"
             />
@@ -61,7 +61,7 @@
           <div class="control">
             <textarea
               id="description-07461245336845779"
-              data-cy="movie-description"
+              data-cy="movie-form__description"
               class="textarea"
               placeholder="Enter Description"
             ></textarea>
@@ -69,16 +69,16 @@
         </div>
 
         <div class="field">
-          <label class="label" for="imdbUrl-03780931512410235">Imdb URL</label>
+          <label class="label" for="imgUrl-03780931512410235">Image URL</label>
           <div class="control">
             <input
-              id="imdbUrl-03780931512410235"
-              data-cy="movie-imdbUrl"
+              id="imgUrl-03780931512410235"
+              data-cy="movie-form__imgUrl"
               class="input is-danger"
-              placeholder="Enter Imdb URL"
+              placeholder="Enter image URL"
             />
           </div>
-          <p class="help is-danger">Imdb URL is required</p>
+          <p class="help is-danger">Image URL is required</p>
         </div>
 
         <div class="field">
@@ -86,18 +86,19 @@
           <div class="control">
             <input
               id="imdbId-7255654555627964"
-              data-cy="movie-imdbId"
+              data-cy="movie-form__imdbId"
               class="input is-danger"
               placeholder="Enter Imdb ID"
             />
           </div>
           <p class="help is-danger">Imdb ID is required</p>
         </div>
+
         <div class="field is-grouped">
           <div class="control">
             <button
               type="submit"
-              data-cy="submit-button"
+              data-cy="movie-form__submit-button"
               class="button is-link"
             >
               Add

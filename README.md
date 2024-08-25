@@ -1,4 +1,4 @@
-# Movies List
+# Movies List Add Form
 
 > Here is the [working version](https://mate-academy.github.io/vue_movies-list-add-form/)
 

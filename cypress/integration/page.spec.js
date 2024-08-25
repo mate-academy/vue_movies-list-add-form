@@ -3,14 +3,15 @@
 import movies from '../../src/data/movies.json';
 
 const page = {
-  getMovies: () => cy.byDataCy('movie-card'),
+  getMovies: () => cy.byDataCy('movie'),
 };
 
 const form = {
-  field: name => cy.byDataCy(`movie-${name}`),
+  field: name => cy.byDataCy(`movie-form__${name}`),
+  submitButton: () => cy.byDataCy(`movie-form__submit-button`),
   error: name => form.field(name).parents('.field').find('.help.is-danger'),
 
-  submit: () => cy.byDataCy('submit-button').click({ force: true }),
+  submit: () => form.submitButton().click({ force: true }),
 
   fill: movie => {
     const empty = '{selectAll}{del}';
@@ -81,37 +82,37 @@ describe('Form', () => {
   });
 
   it('should disable submit button by default', () => {
-    cy.byDataCy('submit-button').should('be.disabled');
+    form.submitButton().should('be.disabled');
   });
 
   it('should enable submit button after entering all the required fields', () => {
     form.fill({ ...newMovie });
 
-    cy.byDataCy('submit-button').should('not.be.disabled');
+    form.submitButton().should('not.be.disabled');
   });
 
   it('should not enable submit button if title is empty', () => {
     form.fill({ ...newMovie, title: '' });
 
-    cy.byDataCy('submit-button').should('be.disabled');
+    form.submitButton().should('be.disabled');
   });
 
   it('should not enable submit button if imgUrl is empty', () => {
     form.fill({ ...newMovie, imgUrl: '' });
 
-    cy.byDataCy('submit-button').should('be.disabled');
+    form.submitButton().should('be.disabled');
   });
 
   it('should not enable submit button if imdbId is empty', () => {
     form.fill({ ...newMovie, imdbId: '' });
 
-    cy.byDataCy('submit-button').should('be.disabled');
+    form.submitButton().should('be.disabled');
   });
 
   it('should enable submit button if description is empty', () => {
     form.fill({ ...newMovie, description: '' });
 
-    cy.byDataCy('submit-button').should('not.be.disabled');
+    form.submitButton().should('not.be.disabled');
   });
 
   it('should show title error only after blur', () => {
