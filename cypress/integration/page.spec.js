@@ -1,42 +1,38 @@
+/// <reference types="cypress" />
 /* eslint-disable max-len */
+import movies from '../../src/data/movies.json';
+
 const page = {
   getMovies: () => cy.byDataCy('movie-card'),
+};
 
-  submitForm: () => {
-    return cy.byDataCy('submit-button').click({ force: true });
-  },
+const form = {
+  field: name => cy.byDataCy(`movie-${name}`),
+  error: name => form.field(name).parents('.field').find('.help.is-danger'),
 
-  fillForm: movie => {
+  submit: () => cy.byDataCy('submit-button').click({ force: true }),
+
+  fill: movie => {
     const empty = '{selectAll}{del}';
 
-    cy.byDataCy('movie-title').type(movie.title || empty);
-    cy.byDataCy('movie-description').type(movie.description || empty);
-    cy.byDataCy('movie-imgUrl').type(movie.imgUrl || empty);
-    cy.byDataCy('movie-imdbUrl').type(movie.imdbUrl || empty);
-    cy.byDataCy('movie-imdbId').type(movie.imdbId || empty);
+    form.field('title').type(movie.title || empty);
+    form.field('description').type(movie.description || empty);
+    form.field('imgUrl').type(movie.imgUrl || empty);
+    form.field('imdbId').type(movie.imdbId || empty);
   },
 
-  getError: name => {
-    return cy
-      .byDataCy(`movie-${name}`)
-      .parents('.field')
-      .find('.help.is-danger');
-  },
-
-  assertFormIsEmpty() {
-    cy.byDataCy('movie-title').should('be.empty');
-    cy.byDataCy('movie-description').should('be.empty');
-    cy.byDataCy('movie-imgUrl').should('be.empty');
-    cy.byDataCy('movie-imdbUrl').should('be.empty');
-    cy.byDataCy('movie-imdbId').should('be.empty');
+  assertEmpty() {
+    form.field('title').should('be.empty');
+    form.field('description').should('be.empty');
+    form.field('imgUrl').should('be.empty');
+    form.field('imdbId').should('be.empty');
   },
 
   assertNoErrors() {
-    page.getError('title').should('not.exist');
-    page.getError('description').should('not.exist');
-    page.getError('imgUrl').should('not.exist');
-    page.getError('imdbUrl').should('not.exist');
-    page.getError('imdbId').should('not.exist');
+    form.error('title').should('not.exist');
+    form.error('description').should('not.exist');
+    form.error('imgUrl').should('not.exist');
+    form.error('imdbId').should('not.exist');
   },
 };
 
@@ -49,45 +45,39 @@ const newMovie = {
   imdbId: 'tt1312171',
 };
 
-describe('NewMovie', () => {
+describe('Form', () => {
   beforeEach(() => {
     cy.visit('/');
   });
 
   it('should have empty fields by default', () => {
-    page.assertFormIsEmpty();
+    form.assertEmpty();
   });
 
   it('should not show errors by default', () => {
-    page.assertNoErrors();
+    form.assertNoErrors();
   });
 
   it('should allow to enter a title', () => {
-    const title = 'The Umbrella Academy';
-
-    cy.byDataCy('movie-title').type(title);
-    cy.byDataCy('movie-title').should('have.value', title);
+    form.field('title').type('The Umbrella Academy');
+    form.field('title').should('have.value', 'The Umbrella Academy');
   });
 
   it('should allow to enter a description', () => {
-    page.getByDataCy('movie-description').type('Some description');
-
-    page
-      .getByDataCy('movie-description')
-      .should('have.value', 'Some description');
+    form.field('description').type('Some description');
+    form.field('description').should('have.value', 'Some description');
   });
 
   it('should allow to enter an imgUrl', () => {
-    cy.byDataCy('movie-imgUrl').type('https://www.example.com/image.jpg');
-    cy.byDataCy('movie-imgUrl').should(
-      'have.value',
-      'https://www.example.com/image.jpg',
-    );
+    const URL = 'https://www.example.com/image.jpg';
+
+    form.field('imgUrl').type(URL);
+    form.field('imgUrl').should('have.value', URL);
   });
 
   it('should allow to enter an imdbId', () => {
-    cy.byDataCy('movie-imdbId').type('tt1312171');
-    cy.byDataCy('movie-imdbId').should('have.value', 'tt1312171');
+    form.field('imdbId').type('tt1312171');
+    form.field('imdbId').should('have.value', 'tt1312171');
   });
 
   it('should disable submit button by default', () => {
@@ -95,95 +85,117 @@ describe('NewMovie', () => {
   });
 
   it('should enable submit button after entering all the required fields', () => {
-    page.fillForm({ ...newMovie });
+    form.fill({ ...newMovie });
+
+    cy.byDataCy('submit-button').should('not.be.disabled');
+  });
+
+  it('should not enable submit button if title is empty', () => {
+    form.fill({ ...newMovie, title: '' });
+
+    cy.byDataCy('submit-button').should('be.disabled');
+  });
+
+  it('should not enable submit button if imgUrl is empty', () => {
+    form.fill({ ...newMovie, imgUrl: '' });
+
+    cy.byDataCy('submit-button').should('be.disabled');
+  });
+
+  it('should not enable submit button if imdbId is empty', () => {
+    form.fill({ ...newMovie, imdbId: '' });
+
+    cy.byDataCy('submit-button').should('be.disabled');
+  });
+
+  it('should enable submit button if description is empty', () => {
+    form.fill({ ...newMovie, description: '' });
 
     cy.byDataCy('submit-button').should('not.be.disabled');
   });
 
   it('should show title error only after blur', () => {
-    cy.byDataCy('movie-title').focus();
-    cy.byDataCy('movie-title').type('1{backspace}');
+    form.field('title').focus();
+    form.error('title').should('not.exist');
 
-    page.getError('title').should('not.exist');
+    form.field('title').type('1{backspace}');
+    form.error('title').should('not.exist');
 
-    cy.byDataCy('movie-title').blur();
-
-    page.getError('title').should('exist');
+    form.field('title').blur();
+    form.error('title').should('exist');
   });
 
   it('should not show description error when empty', () => {
-    cy.byDataCy('movie-description').focus();
-    cy.byDataCy('movie-description').type('1{backspace}');
-    cy.byDataCy('movie-description').blur();
+    form.field('description').focus();
+    form.field('description').type('1{backspace}');
+    form.field('description').blur();
 
-    page.getError('description').should('not.exist');
+    form.error('description').should('not.exist');
   });
 
   it('should show imgUrl error only after blur', () => {
-    cy.byDataCy('movie-imgUrl').focus();
-    cy.byDataCy('movie-imgUrl').type('1{backspace}');
+    form.field('imgUrl').focus();
+    form.error('imgUrl').should('not.exist');
 
-    page.getError('imgUrl').should('not.exist');
+    form.field('imgUrl').type('1{backspace}');
+    form.error('imgUrl').should('not.exist');
 
-    cy.byDataCy('movie-imgUrl').blur();
-
-    page.getError('imgUrl').should('exist');
-  });
-
-  it('should show imdbUrl error only after blur', () => {
-    cy.byDataCy('movie-imdbUrl').focus();
-    cy.byDataCy('movie-imdbUrl').type('1{backspace}');
-
-    page.getError('imdbUrl').should('not.exist');
-
-    cy.byDataCy('movie-imdbUrl').blur();
-
-    page.getError('imdbUrl').should('exist');
+    form.field('imgUrl').blur();
+    form.error('imgUrl').should('exist');
   });
 
   it('should show imdbId error only after blur', () => {
-    cy.byDataCy('movie-imdbId').focus();
-    cy.byDataCy('movie-imdbId').type('1{backspace}');
+    form.field('imdbId').focus();
+    form.error('imdbId').should('not.exist');
 
-    page.getError('imdbId').should('not.exist');
+    form.field('imdbId').type('1{backspace}');
+    form.error('imdbId').should('not.exist');
 
-    cy.byDataCy('movie-imdbId').blur();
-
-    page.getError('imdbId').should('exist');
+    form.field('imdbId').blur();
+    form.error('imdbId').should('exist');
   });
 
   it('should clear the form after a successful submission', () => {
-    page.fillForm({ ...newMovie });
-    page.submitForm();
+    form.fill({ ...newMovie });
+    form.submit();
 
-    page.assertFormIsEmpty();
+    form.assertEmpty();
   });
 
   it('should not clear the form if title is empty', () => {
-    page.fillForm({ ...newMovie, title: '' });
-    page.submitForm();
+    form.fill({ ...newMovie, title: '' });
+    form.submit();
 
-    page
-      .getByDataCy('movie-description')
-      .should('have.value', newMovie.description);
+    form.field('description').should('have.value', newMovie.description);
+    form.field('imgUrl').should('have.value', newMovie.imgUrl);
+    form.field('imdbId').should('have.value', newMovie.imdbId);
+  });
 
-    cy.byDataCy('movie-imgUrl').should('have.value', newMovie.imgUrl);
-    cy.byDataCy('movie-imdbId').should('have.value', newMovie.imdbId);
+  it('should not clear the form if imgUrl is empty', () => {
+    form.fill({ ...newMovie, imgUrl: '' });
+    form.submit();
+
+    form.field('description').should('have.value', newMovie.description);
+    form.field('title').should('have.value', newMovie.title);
+    form.field('imdbId').should('have.value', newMovie.imdbId);
+  });
+
+  it('should not clear the form if imdbId is empty', () => {
+    form.fill({ ...newMovie, imdbId: '' });
+    form.submit();
+
+    form.field('description').should('have.value', newMovie.description);
+    form.field('title').should('have.value', newMovie.title);
+    form.field('imgUrl').should('have.value', newMovie.imgUrl);
   });
 
   it('should not have errors after a successful submission', () => {
-    page.assertNoErrors();
-  });
-});
-
-describe('Page', () => {
-  beforeEach(() => {
-    cy.visit('/');
+    form.assertNoErrors();
   });
 
   it('should add a movie with correct data', () => {
-    page.fillForm({ ...newMovie });
-    page.submitForm();
+    form.fill({ ...newMovie });
+    form.submit();
 
     page.getMovies().should('have.length', 1);
     page.getMovies().last().find('.title').should('have.text', newMovie.title);
@@ -202,26 +214,38 @@ describe('Page', () => {
   });
 
   it('should not be reloaded', () => {
-    page.fillForm({ ...newMovie });
+    form.fill({ ...newMovie });
 
     cy.window().should('not.have.prop', 'beforeReload');
 
     // eslint-disable-next-line no-param-reassign
     cy.window().then(w => (w.beforeReload = true));
 
-    page.submitForm();
+    form.submit();
 
     cy.window().should('have.prop', 'beforeReload', true);
   });
 
   it('should clean the form after adding a movie', () => {
-    page.fillForm({ ...newMovie });
-    page.submitForm();
+    form.fill({ ...newMovie });
+    form.submit();
 
-    cy.byDataCy('movie-title').should('be.empty');
-    cy.byDataCy('movie-description').should('be.empty');
-    cy.byDataCy('movie-imgUrl').should('be.empty');
-    cy.byDataCy('movie-imdbUrl').should('be.empty');
-    cy.byDataCy('movie-imdbId').should('be.empty');
+    form.field('title').should('be.empty');
+    form.field('description').should('be.empty');
+    form.field('imgUrl').should('be.empty');
+    form.field('imdbId').should('be.empty');
+  });
+
+  it('should add multiple movies', () => {
+    form.fill({ ...movies[0] });
+    form.submit();
+
+    form.fill({ ...movies[1] });
+    form.submit();
+
+    form.fill({ ...movies[2] });
+    form.submit();
+
+    page.getMovies().should('have.length', 3);
   });
 });
