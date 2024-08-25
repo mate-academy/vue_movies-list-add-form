@@ -81,40 +81,6 @@ describe('Form', () => {
     form.field('imdbId').should('have.value', 'tt1312171');
   });
 
-  it('should disable submit button by default', () => {
-    form.submitButton().should('be.disabled');
-  });
-
-  it('should enable submit button after entering all the required fields', () => {
-    form.fill({ ...newMovie });
-
-    form.submitButton().should('not.be.disabled');
-  });
-
-  it('should not enable submit button if title is empty', () => {
-    form.fill({ ...newMovie, title: '' });
-
-    form.submitButton().should('be.disabled');
-  });
-
-  it('should not enable submit button if imgUrl is empty', () => {
-    form.fill({ ...newMovie, imgUrl: '' });
-
-    form.submitButton().should('be.disabled');
-  });
-
-  it('should not enable submit button if imdbId is empty', () => {
-    form.fill({ ...newMovie, imdbId: '' });
-
-    form.submitButton().should('be.disabled');
-  });
-
-  it('should enable submit button if description is empty', () => {
-    form.fill({ ...newMovie, description: '' });
-
-    form.submitButton().should('not.be.disabled');
-  });
-
   it('should show title error only after blur', () => {
     form.field('title').focus();
     form.error('title').should('not.exist');

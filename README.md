@@ -6,7 +6,6 @@ You start with an empty movies list a form. Implement adding movies from `src/da
 
 1. Check if `title`, `imgUrl`, `imdbId` are entered when an they loose focus (`@blur`) and show an error message and a red border (`is-danger` class) if field is empty (spaces should be trimmed).
 1. The `description` is optional.
-1. Disable the submit button until all the required fields are filled.
 1. Clear the form after adding a new movie.
 1. Errors should not be shown after clearing the form.
 
