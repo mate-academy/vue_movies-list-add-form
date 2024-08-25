@@ -6,7 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/vue_movies-list/',
+  base: '/vue_movies-list-add-form/',
   plugins: [vue(), vueDevTools()],
   resolve: {
     alias: {

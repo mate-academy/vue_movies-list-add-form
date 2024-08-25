@@ -11,6 +11,7 @@ You start with an empty movies list a form. Implement adding movies from `src/da
 1. Errors should not be shown after clearing the form.
 
 ## Instructions
+
 - Install Prettier Extention and use this [VSCode settings](https://mate-academy.github.io/fe-program/tools/vscode/settings.json) to enable format on save.
 - Open one more terminal and run tests with `npm test` to ensure your solution is correct.
 - Replace `<your_account>` with your Github username in the [DEMO LINK](https://<your_account>.github.io/react_movies-list-js/) and add it to the PR description.

@@ -1,7 +1,7 @@
 {
-  "name": "vue_movies-list",
-  "base": "/vue_movies-list/",
-  "homepage": "vue_movies-list",
+  "name": "vue_movies-list-add-form",
+  "base": "/vue_movies-list-add-form/",
+  "homepage": "vue_movies-list-add-form",
   "version": "0.1.0",
   "keywords": [],
   "author": "Mate Academy",
