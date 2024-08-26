@@ -59,9 +59,9 @@ const list = {
 
 const form = {
   field: name => cy.byDataCy(`movie-form__${name}`),
+  error: name => form.field(name).parents('.field').find('.help.is-danger'),
   submitButton: () => cy.byDataCy(`movie-form__submit-button`),
   cancelButton: () => cy.byDataCy(`movie-form__cancel-button`),
-  error: name => form.field(name).parents('.field').find('.help.is-danger'),
 
   submit: () => form.submitButton().click({ force: true }),
   reset: () => form.cancelButton().click({ force: true }),
@@ -75,7 +75,15 @@ const form = {
     form.field('imdbId').type(movie.imdbId || empty);
   },
 
-  assertValue: (name, value) => form.field(name).should('have.value', value),
+  assertFieldValue: (name, value) =>
+    form.field(name).should('have.value', value),
+
+  assertsValues: movie => {
+    form.assertFieldValue('title', movie.title);
+    form.assertFieldValue('description', movie.description);
+    form.assertFieldValue('imgUrl', movie.imgUrl);
+    form.assertFieldValue('imdbId', movie.imdbId);
+  },
 
   assertEmpty() {
     form.field('title').should('be.empty');
@@ -84,11 +92,8 @@ const form = {
     form.field('imdbId').should('be.empty');
   },
 
-  assertNoErrors() {
-    form.error('title').should('not.exist');
-    form.error('description').should('not.exist');
-    form.error('imgUrl').should('not.exist');
-    form.error('imdbId').should('not.exist');
+  assertErrorCount(count) {
+    cy.get('form .help.is-danger').should('have.length', count);
   },
 };
 
@@ -106,41 +111,41 @@ describe('', () => {
   });
 
   describe('by default', () => {
-    it('should not have movies', () => {
+    it('list has no movies', () => {
       list.getMovies().should('have.length', 0);
     });
 
-    it('should be empty', () => {
+    it('form is empty', () => {
       form.assertEmpty();
     });
 
-    it('should not have errors', () => {
-      form.assertNoErrors();
+    it('form has no errors', () => {
+      form.assertErrorCount(0);
     });
 
-    it('should allow to enter a title', () => {
+    it('title can be entered', () => {
       form.field('title').type('The Umbrella Academy');
-      form.assertValue('title', 'The Umbrella Academy');
+      form.assertFieldValue('title', 'The Umbrella Academy');
     });
 
-    it('should allow to enter a description', () => {
+    it('description can be entered', () => {
       form.field('description').type('Some description');
-      form.assertValue('description', 'Some description');
+      form.assertFieldValue('description', 'Some description');
     });
 
-    it('should allow to enter an imgUrl', () => {
+    it('imgUrl can be entered', () => {
       const URL = 'https://www.example.com/image.jpg';
 
       form.field('imgUrl').type(URL);
-      form.assertValue('imgUrl', URL);
+      form.assertFieldValue('imgUrl', URL);
     });
 
-    it('should allow to enter an imdbId', () => {
+    it('imdbId can be entered', () => {
       form.field('imdbId').type('tt1312171');
-      form.assertValue('imdbId', 'tt1312171');
+      form.assertFieldValue('imdbId', 'tt1312171');
     });
 
-    it('should show title error only after blur', () => {
+    it('empty title error appears only on blur', () => {
       form.field('title').focus();
       form.error('title').should('not.exist');
 
@@ -151,7 +156,7 @@ describe('', () => {
       form.error('title').should('exist');
     });
 
-    it('should not show description error when empty', () => {
+    it('empty description error never appears', () => {
       form.field('description').focus();
       form.field('description').type('1{backspace}');
       form.field('description').blur();
@@ -159,7 +164,7 @@ describe('', () => {
       form.error('description').should('not.exist');
     });
 
-    it('should show imgUrl error only after blur', () => {
+    it('empty imgUrl error appears only on blur', () => {
       form.field('imgUrl').focus();
       form.error('imgUrl').should('not.exist');
 
@@ -170,7 +175,7 @@ describe('', () => {
       form.error('imgUrl').should('exist');
     });
 
-    it('should show imdbId error only after blur', () => {
+    it('empty imdbId error appears only on blur', () => {
       form.field('imdbId').focus();
       form.error('imdbId').should('not.exist');
 
@@ -182,34 +187,34 @@ describe('', () => {
     });
   });
 
-  describe('on success', () => {
-    it('should clear the form', () => {
+  describe('on submit with correct values', () => {
+    beforeEach(() => {
       form.fill({ ...newMovie });
-      form.submit();
-
-      form.assertEmpty();
-      form.assertNoErrors();
     });
 
-    it('should add a movie', () => {
-      form.fill({ ...newMovie });
+    it('movie is added', () => {
       form.submit();
 
       list.getMovies().should('have.length', 1);
       list.assertMovieAt(0, newMovie);
     });
 
-    it('should not reload the page', () => {
+    it('form is cleared', () => {
+      form.submit();
+
+      form.assertEmpty();
+      form.assertErrorCount(0);
+    });
+
+    it('page is not reloaded', () => {
       // eslint-disable-next-line no-param-reassign
       cy.window().then(w => (w.beforeReload = true));
-
-      form.fill({ ...newMovie });
       form.submit();
 
       cy.window().should('have.prop', 'beforeReload', true);
     });
 
-    it('should allow to add multiple movies', () => {
+    it('can add more movies', () => {
       form.fill({ ...movies[0] });
       form.submit();
 
@@ -223,15 +228,25 @@ describe('', () => {
     });
   });
 
-  describe('on validation error', () => {
-    it('should not add a movie', () => {
+  describe('on submit with missing values', () => {
+    it('errors are shown for all empty required fields', () => {
+      form.fill({ title: '', description: '', imgUrl: '', imdbId: '' });
+      form.submit();
+
+      form.assertErrorCount(3);
+      form.error('title').should('exist');
+      form.error('imgUrl').should('exist');
+      form.error('imdbId').should('exist');
+    });
+
+    it('movie is not added', () => {
       form.fill({ ...newMovie, title: '' });
       form.submit();
 
       list.getMovies().should('have.length', 0);
     });
 
-    it('should not reload the page', () => {
+    it('page is not reloaded', () => {
       // eslint-disable-next-line no-param-reassign
       cy.window().then(w => (w.beforeReload = true));
 
@@ -241,41 +256,40 @@ describe('', () => {
       cy.window().should('have.prop', 'beforeReload', true);
     });
 
-    it('should show all validation errors', () => {
-      form.fill({ ...newMovie, title: '', imgUrl: '', imdbId: '' });
+    it('form is not cleared', () => {
+      const values = { ...newMovie, title: '' };
+
+      form.fill(values);
       form.submit();
 
+      form.assertsValues(values);
+
+      form.assertErrorCount(1);
       form.error('title').should('exist');
+    });
+
+    it('empty imgUrl is handled correctly', () => {
+      const values = { ...newMovie, imgUrl: '' };
+
+      form.fill(values);
+      form.submit();
+
+      form.assertsValues(values);
+
+      form.assertErrorCount(1);
       form.error('imgUrl').should('exist');
+    });
+
+    it('empty imdbId is handled correctly', () => {
+      const values = { ...newMovie, imdbId: '' };
+
+      form.fill(values);
+      form.submit();
+
+      form.assertsValues(values);
+
+      form.assertErrorCount(1);
       form.error('imdbId').should('exist');
-      form.error('description').should('not.exist');
-    });
-
-    it('should not clear the form if title is empty', () => {
-      form.fill({ ...newMovie, title: '' });
-      form.submit();
-
-      form.assertValue('description', newMovie.description);
-      form.assertValue('imgUrl', newMovie.imgUrl);
-      form.assertValue('imdbId', newMovie.imdbId);
-    });
-
-    it('should not clear the form if imgUrl is empty', () => {
-      form.fill({ ...newMovie, imgUrl: '' });
-      form.submit();
-
-      form.assertValue('description', newMovie.description);
-      form.assertValue('title', newMovie.title);
-      form.assertValue('imdbId', newMovie.imdbId);
-    });
-
-    it('should not clear the form if imdbId is empty', () => {
-      form.fill({ ...newMovie, imdbId: '' });
-      form.submit();
-
-      form.assertValue('description', newMovie.description);
-      form.assertValue('title', newMovie.title);
-      form.assertValue('imgUrl', newMovie.imgUrl);
     });
   });
 });
