@@ -1,33 +1,33 @@
 /* eslint-disable max-len */
-import movies from '../../src/data/movies.json';
-
-const newMovie = {
-  title: 'Inside Out',
-  description:
-    'After young Riley is uprooted from her Midwest life and moved to San Francisco, her emotions - Joy, Fear, Anger, Disgust and Sadness - conflict on how best to navigate a new city, house, and school.',
-  imgUrl:
-    'https://m.media-amazon.com/images/M/MV5BOTgxMDQwMDk0OF5BMl5BanBnXkFtZTgwNjU5OTg2NDE@._V1_QL75_UX380_CR0,0,380,562_.jpg',
-  imdbId: 'tt2096673',
-};
-
-const SELECTED_CLASS = 'has-background-grey';
+const newMovies = [
+  {
+    title: 'Inside Out',
+    description:
+      'After young Riley is uprooted from her Midwest life and moved to San Francisco, her emotions - Joy, Fear, Anger, Disgust and Sadness - conflict on how best to navigate a new city, house, and school.',
+    imgUrl:
+      'https://m.media-amazon.com/images/M/MV5BOTgxMDQwMDk0OF5BMl5BanBnXkFtZTgwNjU5OTg2NDE@._V1_QL75_UX380_CR0,0,380,562_.jpg',
+    imdbId: 'tt2096673',
+  },
+  {
+    title: 'The Dark Knight',
+    description:
+      'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman, James Gordon and Harvey Dent must work together to put an end to the madness.',
+    imgUrl:
+      'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_QL75_UX380_CR0,0,380,562_.jpg',
+    imdbId: 'tt0468569',
+  },
+  {
+    title: 'Forrest Gump',
+    description:
+      "The history of the United States from the 1950s to the '70s unfolds from the perspective of an Alabama man with an IQ of 75, who yearns to be reunited with his childhood sweetheart.",
+    imgUrl:
+      'https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_QL75_UY562_CR4,0,380,562_.jpg',
+    imdbId: 'tt0109830',
+  },
+];
 
 const list = {
   getMovies: () => cy.byDataCy('movie'),
-  selectMovie: index =>
-    list.getMovies().eq(index).byDataCy('movie__select-button').click(),
-  unselectMovie: index =>
-    list.getMovies().eq(index).byDataCy('movie__unselect-button').click(),
-  deleteMovie: index =>
-    list.getMovies().eq(index).byDataCy('movie__delete-button').click(),
-
-  assertSelected: index =>
-    list.getMovies().eq(index).should('have.class', SELECTED_CLASS),
-  assertNotSelected: index =>
-    list.getMovies().eq(index).should('not.have.class', SELECTED_CLASS),
-  assertSelectedCount: count => {
-    cy.get(`[data-cy="movie"].${SELECTED_CLASS}`).should('have.length', count);
-  },
 
   assertMovieAt: (index, movie) => {
     list
@@ -60,11 +60,7 @@ const list = {
 const form = {
   field: name => cy.byDataCy(`movie-form__${name}`),
   error: name => form.field(name).parents('.field').find('.help.is-danger'),
-  submitButton: () => cy.byDataCy(`movie-form__submit-button`),
-  cancelButton: () => cy.byDataCy(`movie-form__cancel-button`),
-
-  submit: () => form.submitButton().click({ force: true }),
-  reset: () => form.cancelButton().click({ force: true }),
+  submit: () => cy.byDataCy(`movie-form__submit-button`).click({ force: true }),
 
   fill: movie => {
     const empty = '{selectAll}{del}';
@@ -189,14 +185,14 @@ describe('', () => {
 
   describe('on submit with correct values', () => {
     beforeEach(() => {
-      form.fill({ ...newMovie });
+      form.fill({ ...newMovies[0] });
     });
 
     it('movie is added', () => {
       form.submit();
 
       list.getMovies().should('have.length', 1);
-      list.assertMovieAt(0, newMovie);
+      list.assertMovieAt(0, newMovies[0]);
     });
 
     it('form is cleared', () => {
@@ -215,13 +211,13 @@ describe('', () => {
     });
 
     it('can add more movies', () => {
-      form.fill({ ...movies[0] });
+      form.fill({ ...newMovies[0] });
       form.submit();
 
-      form.fill({ ...movies[1] });
+      form.fill({ ...newMovies[1] });
       form.submit();
 
-      form.fill({ ...movies[2] });
+      form.fill({ ...newMovies[2] });
       form.submit();
 
       list.getMovies().should('have.length', 3);
@@ -240,7 +236,7 @@ describe('', () => {
     });
 
     it('movie is not added', () => {
-      form.fill({ ...newMovie, title: '' });
+      form.fill({ ...newMovies[0], title: '' });
       form.submit();
 
       list.getMovies().should('have.length', 0);
@@ -250,14 +246,14 @@ describe('', () => {
       // eslint-disable-next-line no-param-reassign
       cy.window().then(w => (w.beforeReload = true));
 
-      form.fill({ ...newMovie, title: '' });
+      form.fill({ ...newMovies[0], title: '' });
       form.submit();
 
       cy.window().should('have.prop', 'beforeReload', true);
     });
 
     it('form is not cleared', () => {
-      const values = { ...newMovie, title: '' };
+      const values = { ...newMovies[0], title: '' };
 
       form.fill(values);
       form.submit();
@@ -269,7 +265,7 @@ describe('', () => {
     });
 
     it('empty imgUrl is handled correctly', () => {
-      const values = { ...newMovie, imgUrl: '' };
+      const values = { ...newMovies[0], imgUrl: '' };
 
       form.fill(values);
       form.submit();
@@ -281,7 +277,7 @@ describe('', () => {
     });
 
     it('empty imdbId is handled correctly', () => {
-      const values = { ...newMovie, imdbId: '' };
+      const values = { ...newMovies[0], imdbId: '' };
 
       form.fill(values);
       form.submit();
